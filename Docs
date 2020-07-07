@@ -1,0 +1,15 @@
+1. All photo gets same name pattern.
+Model_"photo_type"_"photo_id".jpg
+
+Types of photo:
+1. Exterior
+2. Interior
+3. Scheme
+4. Other
+
+I'm going to rename all the photos to 
+Names on a saildata:
+1. Drawing to scheme
+2. Photo to exterior
+3. Insig to delete
+4. Other to other
