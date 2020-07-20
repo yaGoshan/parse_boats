@@ -6,6 +6,7 @@ import codecs
 import string
 import platform
 import re
+import time
 
 
 def get_path(subfolder=''):
@@ -15,6 +16,7 @@ def get_path(subfolder=''):
     else:
         path_to_parse = os.getcwd() + '/' + subfolder + '/'
     return path_to_parse
+
 
 def get_n_pages(html='n'):
     if html == 'n':
@@ -37,8 +39,7 @@ def read_links_from_file(file_name):
     for boat in r:
         buff = boat.split('|')
         buff[2] = buff[2].replace(' ', '')[:-2]
-        buff[2] = buff[2][:-2]
-        if buff[2] == 'Notpri':
+        if buff[2] == 'Notprice':
             buff[2] = -1
         else:
             buff[2] = int(buff[2])
@@ -46,49 +47,58 @@ def read_links_from_file(file_name):
     return res
 
 
-def load_image_from_url_nettivene(url, model, idb):
+def load_image_from_url_nettivene(url, path):
+    """ Function loads image from URL and saves to path """
     img_data = requests.get(url).content
-    os.makedirs(os.getcwd() + r'/boat_pages/' + model + r'/' + idb, exist_ok=True)
-    pic_name = os.getcwd() + r'/boat_pages/' + model + r'/' + idb + r'/' + url.split('/')[-1]
+    pic_name = path + '/' + url.split('/')[-1]
     with open(pic_name, 'wb') as handler:
         handler.write(img_data)
 
 
-def parse_boat_by_link(test=True):
-    path_to_parse = get_path('boat_pages')
-    model = 'albin57'
-    idb = '456879'
-    if test == True:
-        with open(get_path('html_files') + model + '_' + idb + '.html', 'r+') as input_file:
-            r = input_file.read()
-    else:
-        url = "https://www.nettivene.com/en/purjevene/albin/754843"
-        r = requests.get(url).text
+def load_boat_by_link(url=''):
+    if url == '':
+        url = "https://www.nettivene.com/en/purjevene/finn/806118"
 
-    # print(r)
+    r = requests.get(url).text
     soup = BeautifulSoup(r, 'lxml')
-    data_table = str(soup.find('', class_='data_table'))
-    print(data_table)
-    print(re.findall(r'>+*+</td', data_table))
+    print(url)
+    idb = soup.find('span', {'itemprop': 'productID'}).get_text().split('.')[0]
+    bmodel = soup.find('h1').find('a', {'itemprop':'url'})['title'].\
+        replace(' ','_').replace('/','')
 
-    jpgs = soup.find_all('a', href=True)
-    # print(jpgs)
-    idx = soup.find('span', {'itemprop': 'productID'})
-    print(idx.get_text().split('.')[0])
+    print(idb)
+    print(bmodel)
+
+    test = False
+    if test != True:
+        name = bmodel + '/' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '_' + idb
+        path_to_folder = get_path('boat_pages')+name
+        # os.makedirs(get_path('boat_pages')+bmodel, exist_ok=True)
+        os.makedirs(path_to_folder, exist_ok=True)
+
+        """ Writes down an html of the boat """
+        with open(path_to_folder + '/' + bmodel + '_' + idb +  str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html', 'w') as output:
+             output.write(r)
+
+        jpgs = soup.find_all('a', href=True)
+        # print(jpgs)
+        n_pics = 0
+        for a in jpgs:
+            if a['href'][-9:] == 'large.jpg':
+                load_image_from_url_nettivene(a['href'], path_to_folder)
+                n_pics = n_pics + 1
+                # print(a['href'])
+        print("There " + str(n_pics) + ' pics.')
 
 
-
-    # for a in jpgs:
-    #     if a['href'][-9:] == 'large.jpg':
-    #         load_image_from_url_nettivene(a['href'], model, idb)
-    #         print(a['href'])
-
-    # name = 'boat_page_' + str(datetime.now().strftime("%Y.%m.%d_%H:%M:%S"))
-    # with open(os.getcwd() + '/boat_pages/' + name + '.html', 'w') as output:
-    #     output.write(r.text)
-
-
-def diff_parse_links(offset = 0):
+def diff_parse_links(mode = '', offset = 0):
+    """
+    Function returns links to boats depends on a mode.
+    Modes:
+    a -from old and new files
+    d - only new if comparing lates file
+    l - lates file
+    """
     path_to_parse = get_path('boat_links')
     files_list = []
     for file in os.listdir(path_to_parse):
@@ -97,18 +107,21 @@ def diff_parse_links(offset = 0):
             # print(file)
             files_list.append([file, os.path.getctime(path_to_parse + file)])
 
-    # TODO: check is sort working
-    for file in files_list:
-        print(file)
-    files_list.sort(key=lambda x: x[1])
-    for file in files_list:
-        print(file)
+    # for file in files_list:
+    #     print(file)
+    # print('')
+    files_list.sort(key=lambda x: x[0])
+    # for file in files_list:
+    #     print(file)
+
     """ Offsets file selection to past. 0 - newest and next after it """
     boat_table_new = read_links_from_file(files_list[-1-offset][0])
     links_new = boat_table_new[1]
+    print('New file: ' + files_list[-1 - offset][0])
 
     boat_table_old = read_links_from_file(files_list[-2-offset][0])
     links_old = boat_table_old[1]
+    print('Old file: ' + files_list[-2 - offset][0] + '\n')
 
     new_s = set(links_new)
     old_s = set(links_old)
@@ -116,12 +129,11 @@ def diff_parse_links(offset = 0):
     new_boats = [x for x in new_s if x not in old_s]
     still_boats = [x for x in new_s if x in old_s]
 
-    print(len(set([0])))
     print("Boats used to be:" + str(len(old_s)),
           "Boats now:" + str(len(new_s)),
           "New boats: " + str(len(new_boats)),
           "Boats sold: " + str(len(sold_boats)),
-          "Boats still: " + str(len(still_boats)), sep='\n', end='\n\n\n')
+          "Boats still: " + str(len(still_boats)), sep='\n', end='\n')
 
     for boat in still_boats:
         price_old = -1
@@ -136,6 +148,19 @@ def diff_parse_links(offset = 0):
                 price_new = boat_table_new[2][x]
         if price_new != price_old:
             print(name_b, price_new, price_old, sep=' ', end='\n')
+    print('\n\n')
+    # for b_name in boat_table_new[0]:
+    #     new_b_name = b_name.replace('/','')
+    #     # print(new_b_name)
+    #     if new_b_name != b_name:
+    #         print(b_name + '     ' + new_b_name)
+    if mode == 'a':
+        print('Mode not working.')
+    if mode == 'd':
+        return new_boats
+    if mode == 'l':
+        return new_s
+
 
 def parse_links_from_nettivene():
     """ Parses links to boat pages boat names and prices. """
@@ -169,6 +194,17 @@ def parse_links_from_nettivene():
 
 
 if __name__ == "__main__":
-    # diff_parse_links()
-    parse_boat_by_link(test=True)
+    # print(diff_parse_links(mode='d'))
+    # diff_parse_links(mode='d')
+    load_boat_by_link()
+    i = 0
+    links = diff_parse_links(mode='d')
+    for link in links:
+        i = i + 1
+        load_boat_by_link(link)
+        print("Made: " + str(i) + ' Out of: ' + str(len(links)))
+        print('')
+        time.sleep(3)
+
+    # load_boat_by_link()
     # parse_links_from_nettivene()
