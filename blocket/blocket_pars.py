@@ -18,7 +18,7 @@ def get_path(subfolder=''):
     return path_to_parse
 
 
-def get_n_pages_nettivene(html='n'):
+def get_n_pages_blocket(html='n'):
     if html == 'n':
         url = "https://www.nettivene.com/en/purjevene"
         r = requests.get(url)
@@ -204,7 +204,8 @@ def load_all_new_boats_nettivene():
         time.sleep(3)
 
 if __name__ == "__main__":
-    print(diff_parse_links(mode='d'))
+    get_n_pages_blocket()
+    # print(diff_parse_links(mode='d'))
     # diff_parse_links(mode='d')
     # load_boat_by_link()
     # load_all_new_boats_nettivene()
