@@ -7,25 +7,48 @@ import string
 import platform
 import re
 import time
+import json
+import math
+
+def save_html_file(url):
+    r = requests.get(url).text
+    with open(get_path() + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
+              'w') as output:
+        output.write(r)
+
+
+def load_html_file(name):
+    text = ''
+    with open(get_path() + name,
+              'r') as output:
+        text = output.read()
+    return text
 
 
 def get_path(subfolder=''):
     c_os = platform.system()
-    if c_os == "Windows":
-        path_to_parse = os.getcwd() + '\\' + subfolder + '\\'
+    if subfolder != '':
+        if c_os == "Windows":
+            path_to_parse = os.getcwd() + '\\' + subfolder + '\\'
+        else:
+            path_to_parse = os.getcwd() + '/' + subfolder + '/'
     else:
-        path_to_parse = os.getcwd() + '/' + subfolder + '/'
+        path_to_parse = os.getcwd() + '/'
     return path_to_parse
 
 
 def get_n_pages_blocket(html='n'):
-    if html == 'n':
-        url = "https://www.nettivene.com/en/purjevene"
-        r = requests.get(url)
-    else:
-        r = html
-    soup = BeautifulSoup(r.text, 'lxml')
-    n_page = int(soup.find("span", class_="totPage").text)
+    # if html == 'n':
+    #     url = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&q=segelb%C3%A5t"
+    #     r = requests.get(url)
+    # else:
+    #     r = html
+    r = load_html_file('2020.07.22_15.39.19.html')
+    soup = BeautifulSoup(r, 'lxml')
+    script = soup.find('script',{'id':'initialState'}).text
+    data = json.loads(script)
+    n_page = math.ceil(data['classified']['searchResultCountPreview']['searchTotal']/40)
+
     return n_page
 
 
@@ -37,9 +60,12 @@ def read_links_from_file(file_name):
         r = handler.readlines()
     res = [[], [], []]
     for boat in r:
+        print(boat)
         buff = boat.split('|')
-        buff[2] = buff[2].replace(' ', '')[:-2]
-        if buff[2] == 'Notprice':
+
+        buff[2] = buff[2].replace(' ', '')[:-3]
+        print(buff)
+        if buff[2] == '':
             buff[2] = -1
         else:
             buff[2] = int(buff[2])
@@ -162,30 +188,30 @@ def diff_parse_links(mode = '', offset = 0):
         return new_s
 
 
-def parse_links_from_nettivene():
+def parse_links_from_blocket():
     """ Parses links to boat pages boat names and prices. """
-    url_base = "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"
+    url_base = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page={}&q=segelb%C3%A5t"
     result = list()
-    for i in range(1, get_n_pages() + 1):
+    for i in range(1, get_n_pages_blocket() + 1):
+    # for i in range(1, 2):
         url = url_base.format(str(i))
         print(url)
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'lxml')
 
-        """ R1 - links to boat page. R2 - boat price """
-        r1 = soup.find_all('a', class_='childVifUrl tricky_link')
-        r2 = soup.find_all('div', class_='main_price')
+        """ R1 - boat names. R2 - boat price  R3 - boat links"""
+        r1 = soup.find_all('span', class_='styled__SubjectContainer-sc-1kpvi4z-11 jzzuDW')
+        r2 = soup.find_all('div', class_='Price__StyledPrice-sc-1v2maoc-1 jkvRCw')
+        r3 = soup.find_all('a', class_='Link-sc-139ww1j-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj')
+        # print(r1, r2, r3, sep='\n')
+        for i in range(len(r1)):
+            # print([r1[i].get_text(),r3[i]['href'],r2[i].get_text()])
+            bname = r1[i].get_text().replace('|','').replace('\\','').replace('/','')
+            result.append([bname,
+                           'https://www.blocket.se' + r3[i]['href'],r2[i].get_text()])
 
-        for b in r1:
-            result.append([b.get_text(), b['href']])
-            # print(b.get_text())
-            # print(b['href'])
-        l_res = len(result) - len(r2)
-        for idx, b in enumerate(r2):
-            # print(b.get_text())
-            result[l_res + idx].append(b.get_text())
     # print(result)
-    name = 'nettivene_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
+    name = 'blocket_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
     with open(os.getcwd() + '/boat_links/' + name + '.txt', 'w') as output:
         for boat in result:
             res = '|'.join(boat) + '\n'
@@ -204,9 +230,11 @@ def load_all_new_boats_nettivene():
         time.sleep(3)
 
 if __name__ == "__main__":
-    get_n_pages_blocket()
+    # save_html_file('https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page=1&q=segelb%C3%A5t')
+    # print(get_n_pages_blocket())
+    # parse_links_from_blocket()
     # print(diff_parse_links(mode='d'))
-    # diff_parse_links(mode='d')
+    diff_parse_links(mode='d')
     # load_boat_by_link()
     # load_all_new_boats_nettivene()
     # load_boat_by_link()
