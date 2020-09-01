@@ -7,6 +7,7 @@ import string
 import platform
 import re
 import time
+import csv
 
 
 def get_path(subfolder=''):
@@ -33,17 +34,17 @@ def read_links_from_file(file_name):
     """ Function returning [[boat names], [links], [prices]] """
     path_to_file = get_path('boat_links') + file_name
 
-    with open(path_to_file, 'r') as handler:
-        r = handler.readlines()
-    res = [[], [], []]
-    for boat in r:
-        buff = boat.split('|')
-        buff[2] = buff[2].replace(' ', '')[:-2]
-        if buff[2] == 'Notprice':
-            buff[2] = -1
-        else:
-            buff[2] = int(buff[2])
-        for i in range(3): res[i].append(buff[i])
+    with open(path_to_file, 'r') as csv_file:
+        r = csv.reader(csv_file, delimiter=';')
+        res = [[], [], []]
+        for boat in r:
+            # print(boat)
+            if boat[2] == 'Notpriced':
+                boat[2] = -1
+            else:
+                boat[2] = int(boat[2])
+            for i in range(3):
+                res[i].append(boat[i])
     return res
 
 
@@ -63,8 +64,8 @@ def load_boat_by_link(url=''):
     soup = BeautifulSoup(r, 'lxml')
     print(url)
     idb = soup.find('span', {'itemprop': 'productID'}).get_text().split('.')[0]
-    bmodel = soup.find('h1').find('a', {'itemprop':'url'})['title'].\
-        replace(' ','_').replace('/','')
+    bmodel = soup.find('h1').find('a', {'itemprop': 'url'})['title']. \
+        replace(' ', '_').replace('/', '')
 
     print(idb)
     print(bmodel)
@@ -72,13 +73,15 @@ def load_boat_by_link(url=''):
     test = False
     if test != True:
         name = bmodel + '/' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '_' + idb
-        path_to_folder = get_path('boat_pages')+name
+        path_to_folder = get_path('boat_pages') + name
         # os.makedirs(get_path('boat_pages')+bmodel, exist_ok=True)
         os.makedirs(path_to_folder, exist_ok=True)
 
         """ Writes down an html of the boat """
-        with open(path_to_folder + '/' + bmodel + '_' + idb +  str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html', 'w') as output:
-             output.write(r)
+        with open(
+                path_to_folder + '/' + bmodel + '_' + idb + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
+                'w') as output:
+            output.write(r)
 
         jpgs = soup.find_all('a', href=True)
         # print(jpgs)
@@ -91,7 +94,7 @@ def load_boat_by_link(url=''):
         print("There " + str(n_pics) + ' pics.')
 
 
-def diff_parse_links(mode = '', offset = 0):
+def diff_parse_links(mode='', offset=0):
     """
     Function returns links to boats depends on a mode.
     Modes:
@@ -102,7 +105,7 @@ def diff_parse_links(mode = '', offset = 0):
     path_to_parse = get_path('boat_links')
     files_list = []
     for file in os.listdir(path_to_parse):
-        if file.endswith(".txt"):
+        if file.endswith(".csv"):
             # print(os.path.join(os.getcwd(), file))
             # print(file)
             files_list.append([file, os.path.getctime(path_to_parse + file)])
@@ -115,11 +118,11 @@ def diff_parse_links(mode = '', offset = 0):
     #     print(file)
 
     """ Offsets file selection to past. 0 - newest and next after it """
-    boat_table_new = read_links_from_file(files_list[-1-offset][0])
+    boat_table_new = read_links_from_file(files_list[-1 - offset][0])
     links_new = boat_table_new[1]
     print('New file: ' + files_list[-1 - offset][0])
 
-    boat_table_old = read_links_from_file(files_list[-2-offset][0])
+    boat_table_old = read_links_from_file(files_list[-2 - offset][0])
     links_old = boat_table_old[1]
     print('Old file: ' + files_list[-2 - offset][0] + '\n')
 
@@ -166,7 +169,8 @@ def parse_links_from_nettivene():
     """ Parses links to boat pages boat names and prices. """
     url_base = "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"
     result = list()
-    for i in range(1, get_n_pages_nettivene() + 1):
+    # for i in range(1, get_n_pages_nettivene() + 1):
+    for i in range(1, 3):
         url = url_base.format(str(i))
         print(url)
         r = requests.get(url)
@@ -177,19 +181,19 @@ def parse_links_from_nettivene():
         r2 = soup.find_all('div', class_='main_price')
 
         for b in r1:
-            result.append([b.get_text(), b['href']])
+            result.append([b.get_text().strip(), b['href']])
             # print(b.get_text())
             # print(b['href'])
         l_res = len(result) - len(r2)
         for idx, b in enumerate(r2):
             # print(b.get_text())
-            result[l_res + idx].append(b.get_text())
+            result[l_res + idx].append(b.get_text().replace(' ', '').replace('€', ''))
     # print(result)
     name = 'nettivene_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
-    with open(os.getcwd() + '/boat_links/' + name + '.txt', 'w') as output:
+    with open(os.getcwd() + '/boat_links/' + name + '.csv', 'w') as csv_file:
+        writer = csv.writer(csv_file, delimiter=';')
         for boat in result:
-            res = '|'.join(boat) + '\n'
-            output.write(res)
+            writer.writerow(boat)
     print("Boats total: " + str(len(result)))
 
 
@@ -203,10 +207,9 @@ def load_all_new_boats_nettivene():
         print('')
         time.sleep(3)
 
-if __name__ == "__main__":
-    # diff_parse_links(mode='d')
-    # load_boat_by_link()
-    # parse_links_from_nettivene()
-    # print(diff_parse_links(mode='d'))
-    load_all_new_boats_nettivene()
 
+if __name__ == "__main__":
+    # load_boat_by_link()
+    parse_links_from_nettivene()
+    diff_parse_links(mode='d')
+    # load_all_new_boats_nettivene()

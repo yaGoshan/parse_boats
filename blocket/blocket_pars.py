@@ -9,6 +9,8 @@ import re
 import time
 import json
 import math
+import csv
+
 
 def save_html_file(url):
     r = requests.get(url).text
@@ -38,17 +40,18 @@ def get_path(subfolder=''):
 
 
 def get_n_pages_blocket(html='n'):
-    # if html == 'n':
-    #     url = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&q=segelb%C3%A5t"
-    #     r = requests.get(url)
-    # else:
-    #     r = html
+    if html == 'n':
+        url = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&q=segelb%C3%A5t"
+        r = requests.get(url)
+    else:
+        r = html
     r = load_html_file('2020.07.22_15.39.19.html')
     soup = BeautifulSoup(r, 'lxml')
-    script = soup.find('script',{'id':'initialState'}).text
+    # print('Hi!!', soup.find('script', {'id': 'initialState'}).get_text)
+    # script = soup.find('script', {'id': 'initialState'}).text
+    script = soup.find('script', {'id': 'initialState'}).string
     data = json.loads(script)
-    n_page = math.ceil(data['classified']['searchResultCountPreview']['searchTotal']/40)
-
+    n_page = math.ceil(data['classified']['searchResultCountPreview']['searchTotal'] / 40)
     return n_page
 
 
@@ -56,20 +59,17 @@ def read_links_from_file(file_name):
     """ Function returning [[boat names], [links], [prices]] """
     path_to_file = get_path('boat_links') + file_name
 
-    with open(path_to_file, 'r') as handler:
-        r = handler.readlines()
-    res = [[], [], []]
-    for boat in r:
-        print(boat)
-        buff = boat.split('|')
-
-        buff[2] = buff[2].replace(' ', '')[:-3]
-        print(buff)
-        if buff[2] == '':
-            buff[2] = -1
-        else:
-            buff[2] = int(buff[2])
-        for i in range(3): res[i].append(buff[i])
+    with open(path_to_file, 'r') as csv_file:
+        r = csv.reader(csv_file, delimiter=';')
+        res = [[], [], []]
+        for boat in r:
+            # print(boat)
+            if boat[2] == '':
+                boat[2] = -1
+            else:
+                boat[2] = int(boat[2])
+            for i in range(3):
+                res[i].append(boat[i])
     return res
 
 
@@ -89,8 +89,8 @@ def load_boat_by_link(url=''):
     soup = BeautifulSoup(r, 'lxml')
     print(url)
     idb = soup.find('span', {'itemprop': 'productID'}).get_text().split('.')[0]
-    bmodel = soup.find('h1').find('a', {'itemprop':'url'})['title'].\
-        replace(' ','_').replace('/','')
+    bmodel = soup.find('h1').find('a', {'itemprop': 'url'})['title']. \
+        replace(' ', '_').replace('/', '')
 
     print(idb)
     print(bmodel)
@@ -98,13 +98,15 @@ def load_boat_by_link(url=''):
     test = False
     if test != True:
         name = bmodel + '/' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '_' + idb
-        path_to_folder = get_path('boat_pages')+name
+        path_to_folder = get_path('boat_pages') + name
         # os.makedirs(get_path('boat_pages')+bmodel, exist_ok=True)
         os.makedirs(path_to_folder, exist_ok=True)
 
         """ Writes down an html of the boat """
-        with open(path_to_folder + '/' + bmodel + '_' + idb +  str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html', 'w') as output:
-             output.write(r)
+        with open(
+                path_to_folder + '/' + bmodel + '_' + idb + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
+                'w') as output:
+            output.write(r)
 
         jpgs = soup.find_all('a', href=True)
         # print(jpgs)
@@ -117,7 +119,7 @@ def load_boat_by_link(url=''):
         print("There " + str(n_pics) + ' pics.')
 
 
-def diff_parse_links(mode = '', offset = 0):
+def diff_parse_links(mode='', offset=0):
     """
     Function returns links to boats depends on a mode.
     Modes:
@@ -128,7 +130,7 @@ def diff_parse_links(mode = '', offset = 0):
     path_to_parse = get_path('boat_links')
     files_list = []
     for file in os.listdir(path_to_parse):
-        if file.endswith(".txt"):
+        if file.endswith(".csv"):
             # print(os.path.join(os.getcwd(), file))
             # print(file)
             files_list.append([file, os.path.getctime(path_to_parse + file)])
@@ -141,13 +143,13 @@ def diff_parse_links(mode = '', offset = 0):
     #     print(file)
 
     """ Offsets file selection to past. 0 - newest and next after it """
-    boat_table_new = read_links_from_file(files_list[-1-offset][0])
-    links_new = boat_table_new[1]
     print('New file: ' + files_list[-1 - offset][0])
+    boat_table_new = read_links_from_file(files_list[-1 - offset][0])
+    links_new = boat_table_new[1]
 
-    boat_table_old = read_links_from_file(files_list[-2-offset][0])
-    links_old = boat_table_old[1]
     print('Old file: ' + files_list[-2 - offset][0] + '\n')
+    boat_table_old = read_links_from_file(files_list[-2 - offset][0])
+    links_old = boat_table_old[1]
 
     new_s = set(links_new)
     old_s = set(links_old)
@@ -206,16 +208,16 @@ def parse_links_from_blocket():
         # print(r1, r2, r3, sep='\n')
         for i in range(len(r1)):
             # print([r1[i].get_text(),r3[i]['href'],r2[i].get_text()])
-            bname = r1[i].get_text().replace('|','').replace('\\','').replace('/','')
+            bname = r1[i].get_text().replace('|', '').replace('\\', '').replace('/', '').replace(';', '')
             result.append([bname,
-                           'https://www.blocket.se' + r3[i]['href'],r2[i].get_text()])
+                           'https://www.blocket.se' + r3[i]['href'], r2[i].get_text().replace(' ', '').replace('kr', '')] )
 
     # print(result)
     name = 'blocket_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
-    with open(os.getcwd() + '/boat_links/' + name + '.txt', 'w') as output:
+    with open(os.getcwd() + '/boat_links/' + name + '.csv', 'w') as csv_file:
+        writer = csv.writer(csv_file, delimiter=';')
         for boat in result:
-            res = '|'.join(boat) + '\n'
-            output.write(res)
+            writer.writerow(boat)
     print("Boats total: " + str(len(result)))
 
 
@@ -229,14 +231,12 @@ def load_all_new_boats_nettivene():
         print('')
         time.sleep(3)
 
+
 if __name__ == "__main__":
     # save_html_file('https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page=1&q=segelb%C3%A5t')
-    # print(get_n_pages_blocket())
-    # parse_links_from_blocket()
-    # print(diff_parse_links(mode='d'))
+    parse_links_from_blocket()
     diff_parse_links(mode='d')
     # load_boat_by_link()
     # load_all_new_boats_nettivene()
     # load_boat_by_link()
     # parse_links_from_nettivene()
-
