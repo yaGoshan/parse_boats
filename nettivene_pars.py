@@ -22,8 +22,7 @@ def get_n_pages_nettivene(html='n'):
     return n_page
 
 
-
-def load_boat_by_link(url=''):
+def load_boat_by_link_nettivene(url=''):
     if url == '':
         url = "https://www.nettivene.com/en/purjevene/finn/806118"
 
@@ -61,13 +60,12 @@ def load_boat_by_link(url=''):
         print("There " + str(n_pics) + ' pics.')
 
 
-
 def parse_links_from_nettivene():
     """ Parses links to boat pages boat names and prices. """
     url_base = "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"
     result = list()
-    # for i in range(1, get_n_pages_nettivene() + 1):
-    for i in range(1, 3):
+    for i in range(1, get_n_pages_nettivene() + 1):
+    # for i in range(1, 3):
         url = url_base.format(str(i))
         print(url)
         r = requests.get(url)
@@ -84,7 +82,7 @@ def parse_links_from_nettivene():
         l_res = len(result) - len(r2)
         for idx, b in enumerate(r2):
             # print(b.get_text())
-            if b == 'Notpriced':
+            if b.get_text().replace(' ', '') == 'Notpriced':
                 result[l_res + idx].append('-1')
             else:
                 result[l_res + idx].append(b.get_text().replace(' ', '').replace('€', ''))
@@ -102,14 +100,14 @@ def load_all_new_boats_nettivene():
     links = diff_parse_links(mode='d')
     for link in links:
         i = i + 1
-        load_boat_by_link(link)
+        load_boat_by_link_nettivene(link)
         print("Made: " + str(i) + ' Out of: ' + str(len(links)))
         print('')
         time.sleep(3)
 
 
 if __name__ == "__main__":
-    # load_boat_by_link()
-    # parse_links_from_nettivene()
+    # load_boat_by_link_nettivene()
+    parse_links_from_nettivene()
     pbb.diff_parse_links(site='nettivene', mode='d')
     # load_all_new_boats_nettivene()

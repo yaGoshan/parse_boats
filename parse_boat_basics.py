@@ -124,7 +124,7 @@ def save_html_file(url):
 
 def load_html_file(name):
     text = ''
-    with open(pbb.get_path() + name,
+    with open(get_path() + name,
               'r') as output:
         text = output.read()
     return text

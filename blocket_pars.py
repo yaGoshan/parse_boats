@@ -19,8 +19,8 @@ def get_n_pages_blocket(html='n'):
         r = requests.get(url)
     else:
         r = html
-    r = pbb.load_html_file('2020.07.22_15.39.19.html')
-    soup = BeautifulSoup(r, 'lxml')
+        # r = pbb.load_html_file('2020.07.22_15.39.19.html')
+    soup = BeautifulSoup(r.text, 'lxml')
     # print('Hi!!', soup.find('script', {'id': 'initialState'}).get_text)
     # script = soup.find('script', {'id': 'initialState'}).text
     script = soup.find('script', {'id': 'initialState'}).string
@@ -29,10 +29,9 @@ def get_n_pages_blocket(html='n'):
     return n_page
 
 
-
-def load_boat_by_link(url=''):
+def load_boat_by_link_blocker(url=''):
     if url == '':
-        url = "https://www.nettivene.com/en/purjevene/finn/806118"
+        url = "https://www.blocket.com/en/purjevene/finn/806118"
 
     r = requests.get(url).text
     soup = BeautifulSoup(r, 'lxml')
@@ -95,19 +94,19 @@ def parse_links_from_blocket():
 
     # print(result)
     name = 'blocket_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
-    with open(os.getcwd() + '/boat_links/' + name + '.csv', 'w') as csv_file:
+    with open(os.getcwd() + '/blocket_boat_links/' + name + '.csv', 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=';')
         for boat in result:
             writer.writerow(boat)
     print("Boats total: " + str(len(result)))
 
 
-def load_all_new_boats_nettivene():
+def load_all_new_boats_blocket():
     i = 0
     links = diff_parse_links(mode='d')
     for link in links:
         i = i + 1
-        load_boat_by_link(link)
+        load_boat_by_link_blocker(link)
         print("Made: " + str(i) + ' Out of: ' + str(len(links)))
         print('')
         time.sleep(3)
@@ -116,7 +115,7 @@ def load_all_new_boats_nettivene():
 if __name__ == "__main__":
     parse_links_from_blocket()
     pbb.diff_parse_links(site='blocket', mode='d')
-    # load_boat_by_link()
-    # load_all_new_boats_nettivene()
-    # load_boat_by_link()
-    # parse_links_from_nettivene()
+    # load_boat_by_link_blocker()
+    # load_all_new_boats_blocket()
+    # load_boat_by_link_blocker()
+    # parse_links_from_blocket()
