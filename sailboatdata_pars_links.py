@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import os
 import codecs
 import boat_parser_additional_functions as bp_add
+import csv
+
 
 def db_add_boat_link(link_info):
     conn = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='localhost')
@@ -19,14 +21,19 @@ def db_add_boat_link(link_info):
 
 
 """ If file name is None, then save boat links to DB and write info to file else, save links to file. """
+
+proxies = {
+  'https': 'http://181.215.147.178:4787',
+}
+
 def get_boat_pages_from_search(file_name=None, all_pages=False):
     i = 0
     page_total = int(bp_add.get_boat_number() / 100) + 1
-    parse_delay = 0.1 # In seconds
+    parse_delay = 10  # In seconds
     if all_pages == True:
         page_max = page_total
     else:
-        page_max = 1
+        page_max = 2
 
     url_base = "https://sailboatdata.com/sailboat?paginate=100&sort=name&page="
 
@@ -38,7 +45,7 @@ def get_boat_pages_from_search(file_name=None, all_pages=False):
                     parse_delay))
     """ Iterate over pages in search. """
     for n_page in range(1, page_max + 1):
-        r = requests.get(url_base + str(n_page))
+        r = requests.get(url_base + str(n_page), verify=False, proxies=proxies)
         time.sleep(parse_delay)
         print("Page: " + str(n_page))
         html = r.text
@@ -49,11 +56,12 @@ def get_boat_pages_from_search(file_name=None, all_pages=False):
             for boat_url in soup.find('tbody').find_all('a', href=True):
                 db_add_boat_link({'link': boat_url.get('href'), 'model': boat_url.text})
         else:
-            with open(file_name, 'a+') as output_file:
-                i += 1
-                print(i)
+            with open(os.getcwd() + '/saildata_boat_links/' + file_name + '.csv', 'a') as csv_file:
+                writer = csv.writer(csv_file, delimiter=';')
                 for boat_url in soup.find('tbody').find_all('a', href=True):
-                    output_file.write(boat_url.get('href') + "\n")
+                    writer.writerow([boat_url.getText(), boat_url.get('href')])
+                    
+
 
     with open(bp_add.get_file_name(), 'a+') as output_file:
         output_file.write("Parsing had been finished.")
@@ -78,4 +86,4 @@ def procced_list_of_links():
         if i % 100 == 0:
             print('Proceeded ' + str(i))
         time.sleep(parse_delay)
-        bp_add.load_and_save_html(item[0], item[1].replace('/','|'))
+        bp_add.load_and_save_html(item[0], item[1].replace('/', '|'))

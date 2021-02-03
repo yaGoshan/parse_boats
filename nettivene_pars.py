@@ -1,5 +1,5 @@
 import requests
-import parse_boat_basics as pbb
+import parse_ads_basics as pbb
 from datetime import datetime
 from bs4 import BeautifulSoup
 import os
@@ -11,6 +11,7 @@ import time
 import csv
 
 
+
 def get_n_pages_nettivene(html='n'):
     if html == 'n':
         url = "https://www.nettivene.com/en/purjevene"
@@ -18,6 +19,7 @@ def get_n_pages_nettivene(html='n'):
     else:
         r = html
     soup = BeautifulSoup(r.text, 'lxml')
+    load_and
     n_page = int(soup.find("span", class_="totPage").text)
     return n_page
 

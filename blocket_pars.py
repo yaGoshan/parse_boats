@@ -1,5 +1,5 @@
 import requests
-import parse_boat_basics as pbb
+import parse_ads_basics as pbb
 from datetime import datetime
 from bs4 import BeautifulSoup
 import os

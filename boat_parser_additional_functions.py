@@ -5,9 +5,13 @@ from bs4 import BeautifulSoup
 import os
 import codecs
 
+proxies = {
+  'https': 'http://181.215.147.178:4787',
+}
+
 def get_boat_number():
     url = "https://sailboatdata.com/sailboat"
-    r = requests.get(url)
+    r = requests.get(url, verify=False, proxies=proxies)
     boat_number = -1
     soup = BeautifulSoup(r.text, 'lxml')
     texts = soup.find_all('li')
@@ -26,12 +30,14 @@ def get_file_name():
     print(file_name)
     return file_name
 
+
 def load_image_from_url(url, model):
     img_data = requests.get(url).content
     os.makedirs(os.getcwd() + r'/photo/' + model, exist_ok=True)
     pic_name = os.getcwd() + r'/photo/' + model+r'/' + url.split('/')[-1]
     with open(pic_name, 'wb') as handler:
         handler.write(img_data)
+
 
 def load_and_save_html(link, name):
     url = link + "?units=metric"
