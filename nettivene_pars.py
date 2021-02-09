@@ -2,6 +2,7 @@ import requests
 import parse_ads_basics as pbb
 from datetime import datetime
 from bs4 import BeautifulSoup
+
 import os
 import codecs
 import string
@@ -12,14 +13,16 @@ import csv
 
 
 
+
+
 def get_n_pages_nettivene(html='n'):
     if html == 'n':
         url = "https://www.nettivene.com/en/purjevene"
-        r = requests.get(url)
+        r = pbb.get_html_from_url(url)
     else:
         r = html
-    soup = BeautifulSoup(r.text, 'lxml')
-    load_and
+    soup = BeautifulSoup(r, 'lxml')
+    # print(soup.get_text())
     n_page = int(soup.find("span", class_="totPage").text)
     return n_page
 
@@ -28,7 +31,7 @@ def load_boat_by_link_nettivene(url=''):
     if url == '':
         url = "https://www.nettivene.com/en/purjevene/finn/806118"
 
-    r = requests.get(url).text
+    r = pbb.get_html_from_url(url)
     soup = BeautifulSoup(r, 'lxml')
     print(url)
     idb = soup.find('span', {'itemprop': 'productID'}).get_text().split('.')[0]
@@ -70,8 +73,8 @@ def parse_links_from_nettivene():
     # for i in range(1, 3):
         url = url_base.format(str(i))
         print(url)
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'lxml')
+        r = pbb.get_html_from_url(url)
+        soup = BeautifulSoup(r, 'lxml')
 
         """ R1 - links to boat page. R2 - boat price """
         r1 = soup.find_all('a', class_='childVifUrl tricky_link')
@@ -109,7 +112,12 @@ def load_all_new_boats_nettivene():
 
 
 if __name__ == "__main__":
+    # print(get_n_pages_nettivene())
+
+
     # load_boat_by_link_nettivene()
+
     parse_links_from_nettivene()
     pbb.diff_parse_links(site='nettivene', mode='d')
+
     # load_all_new_boats_nettivene()

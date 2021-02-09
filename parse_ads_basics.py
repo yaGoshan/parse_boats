@@ -8,6 +8,20 @@ import platform
 import re
 import time
 import csv
+from selenium import webdriver
+
+
+def get_html_from_url(url):
+    browser = webdriver.Firefox(executable_path='./drivers/geckodriver')
+    browser.get(url)
+    time.sleep(3)
+    r = browser.page_source
+    
+    # print(r)
+    # input()
+    
+    browser.quit()
+    return r
 
 
 def get_path(subfolder=''):
@@ -49,9 +63,9 @@ def diff_parse_links(site, mode='', offset=0):
     """
     Function returns links to boats depends on a mode.
     Modes:
-    a -from old and new files
+    a - from old and new files
     d - only new if comparing lates file
-    l - lates file
+    l - latest file
     """
     path_to_parse = get_path(site + '_boat_links')
     files_list = []
@@ -88,7 +102,7 @@ def diff_parse_links(site, mode='', offset=0):
           "New boats: " + str(len(new_boats)),
           "Boats sold: " + str(len(sold_boats)),
           "Boats still: " + str(len(still_boats)), sep='\n', end='\n\n')
-
+    print('Boat name. Price new. Price old.')
     for boat in still_boats:
         price_old = -1
         price_new = -1

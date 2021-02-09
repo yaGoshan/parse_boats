@@ -16,16 +16,21 @@ import csv
 def get_n_pages_blocket(html='n'):
     if html == 'n':
         url = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&q=segelb%C3%A5t"
-        r = requests.get(url)
+        r = pbb.get_html_from_url(url)
     else:
         r = html
         # r = pbb.load_html_file('2020.07.22_15.39.19.html')
-    soup = BeautifulSoup(r.text, 'lxml')
-    # print('Hi!!', soup.find('script', {'id': 'initialState'}).get_text)
-    # script = soup.find('script', {'id': 'initialState'}).text
-    script = soup.find('script', {'id': 'initialState'}).string
-    data = json.loads(script)
-    n_page = math.ceil(data['classified']['searchResultCountPreview']['searchTotal'] / 40)
+
+    soup = BeautifulSoup(r, 'lxml')
+    script = soup.find_all('a', href=True)
+    print('\n\n\n\n\n\n')
+    n_page = 0
+    for link in script:
+        useful_link = link['href'].find('page=')
+        if useful_link != -1:
+            text = link['href'][useful_link+5:useful_link+10].split('&')[0]
+            if int(text) > n_page:
+                n_page = int(text)
     return n_page
 
 
@@ -33,7 +38,7 @@ def load_boat_by_link_blocker(url=''):
     if url == '':
         url = "https://www.blocket.com/en/purjevene/finn/806118"
 
-    r = requests.get(url).text
+    r = pbb.get_html_from_url(url)
     soup = BeautifulSoup(r, 'lxml')
     print(url)
     idb = soup.find('span', {'itemprop': 'productID'}).get_text().split('.')[0]
@@ -75,22 +80,43 @@ def parse_links_from_blocket():
     # for i in range(1, 2):
         url = url_base.format(str(i))
         print(url)
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'lxml')
+        r = pbb.get_html_from_url(url)
+        soup = BeautifulSoup(r, 'lxml')
 
+        # print(r)
+        
         """ R1 - boat names. R2 - boat price  R3 - boat links"""
-        r1 = soup.find_all('span', class_='styled__SubjectContainer-sc-1kpvi4z-11 jzzuDW')
-        r2 = soup.find_all('div', class_='Price__StyledPrice-sc-1v2maoc-1 jkvRCw')
-        r3 = soup.find_all('a', class_='Link-sc-139ww1j-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj')
-        # print(r1, r2, r3, sep='\n')
-        for i in range(len(r1)):
-            # print([r1[i].get_text(),r3[i]['href'],r2[i].get_text()])
-            bname = r1[i].get_text().replace('|', '').replace('\\', '').replace('/', '').replace(';', '')
-            if r2[i].get_text().replace(' ', '') == '':
-                price = '-1'
+        boats = []
+        for EachPart in soup.select('a[class*="Link-sc-139ww1j-0 styled__StyledTitleLink"]'):
+            # print(EachPart.get_text(), EachPart['href'], type(EachPart))
+            boats.append([EachPart.get_text(), 'https://www.blocket.se' + EachPart['href']])
+
+        for idx, EachPart in enumerate(soup.select('div[class*="Price__Sty"]')):
+            # print(EachPart.get_text())
+            price = EachPart.get_text().replace(' ', '').replace('kr', '')
+            if len(price) == 0:
+                price = -1
+            if idx < len(boats):
+                boats[idx].append(price)
             else:
-                price = r2[i].get_text().replace(' ', '').replace('kr', '')
-            result.append([bname, 'https://www.blocket.se' + r3[i]['href'], price])
+                print(price)
+
+        # for boat in boats:
+        #     print(boat)
+        result += boats
+        # input()
+        # r1 = soup.find_all('span', class_='styled__SubjectContainer-sc-1kpvi4z-11 jzzuDW')
+        # r2 = soup.find_all('div', class_='Price__StyledPrice-sc-1v2maoc-1 jkvRCw')
+        # r3 = soup.find_all('a', class_='Link-sc-139ww1j-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj')
+        # print(r1, r2, r3, sep='\n')
+        # for i in range(len(r1)):
+        #     # print([r1[i].get_text(),r3[i]['href'],r2[i].get_text()])
+        #     bname = r1[i].get_text().replace('|', '').replace('\\', '').replace('/', '').replace(';', '')
+        #     if r2[i].get_text().replace(' ', '') == '':
+        #         price = '-1'
+        #     else:
+        #         price = r2[i].get_text().replace(' ', '').replace('kr', '')
+        #     result.append([bname, 'https://www.blocket.se' + r3[i]['href'], price])
 
     # print(result)
     name = 'blocket_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
