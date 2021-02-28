@@ -12,9 +12,15 @@ from selenium import webdriver
 
 
 def get_html_from_url(url):
-    browser = webdriver.Firefox(executable_path='./drivers/geckodriver')
+    profile = webdriver.FirefoxProfile()
+    # 1 - Allow all images
+    # 2 - Block all images
+    # 3 - Block 3rd party images 
+    profile.set_preference("permissions.default.image", 2)
+    
+    browser = webdriver.Firefox(executable_path='./drivers/geckodriver', firefox_profile=profile)
     browser.get(url)
-    time.sleep(3)
+    time.sleep(10)
     r = browser.page_source
     
     # print(r)
@@ -59,6 +65,16 @@ def read_links_from_file(file_name, site):
     return res
 
 
+def get_files_list(path_to, file_extension='csv'):
+    files_list = []
+    for file in os.listdir(path_to):
+        if file.endswith("." + file_extension):
+            # print(os.path.join(os.getcwd(), file))
+            # print(file)
+            files_list.append([file, os.path.getctime(path_to + file)])
+    return files_list
+
+
 def diff_parse_links(site, mode='', offset=0):
     """
     Function returns links to boats depends on a mode.
@@ -68,12 +84,7 @@ def diff_parse_links(site, mode='', offset=0):
     l - latest file
     """
     path_to_parse = get_path(site + '_boat_links')
-    files_list = []
-    for file in os.listdir(path_to_parse):
-        if file.endswith(".csv"):
-            # print(os.path.join(os.getcwd(), file))
-            # print(file)
-            files_list.append([file, os.path.getctime(path_to_parse + file)])
+    files_list = get_files_list(path_to_parse, 'csv')
 
     # for file in files_list:
     #     print(file)

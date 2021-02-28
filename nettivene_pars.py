@@ -118,6 +118,6 @@ if __name__ == "__main__":
     # load_boat_by_link_nettivene()
 
     parse_links_from_nettivene()
-    pbb.diff_parse_links(site='nettivene', mode='d')
+    print(pbb.diff_parse_links(site='nettivene', mode='d'))
 
     # load_all_new_boats_nettivene()

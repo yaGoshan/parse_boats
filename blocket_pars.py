@@ -73,7 +73,7 @@ def load_boat_by_link_blocker(url=''):
 
 
 def parse_links_from_blocket():
-    """ Parses links to boat pages boat names and prices. """
+    """ Parses links to boat pages, boat names and prices. """
     url_base = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page={}&q=segelb%C3%A5t"
     result = list()
     for i in range(1, get_n_pages_blocket() + 1):
@@ -140,7 +140,7 @@ def load_all_new_boats_blocket():
 
 if __name__ == "__main__":
     parse_links_from_blocket()
-    pbb.diff_parse_links(site='blocket', mode='d')
+    pbb.diff_parse_links(site='blocket', mode='d', offset=0)
     # load_boat_by_link_blocker()
     # load_all_new_boats_blocket()
     # load_boat_by_link_blocker()
