@@ -13,7 +13,7 @@ import csv
 
 
 def get_n_pages_boats24():
-    url = 'https://www.boats24.com/sailboat/#zustand=gebraucht'
+    url = 'https://www.boats24.com/sailboat/#zustand=gebraucht&auswahl=7'
     r = pbb.get_html_from_url(url)
     soup = BeautifulSoup(r, 'lxml')
     text = soup.find_all(True, {'class': ['sr-us']})
@@ -25,7 +25,7 @@ def get_n_pages_boats24():
 
 def parse_links_from_boats24():
     """ Parses links to boat pages, boat names, prices, location and year built. """
-    url_base = 'https://www.boats24.com/sailboat/?page={}#cur=EUR&auswahl=7'
+    url_base = 'https://www.boats24.com/sailboat/?page={}#cur=EUR&zustand=gebraucht'
     result = list()
     try:
         for i in range(1, get_n_pages_boats24() + 1):

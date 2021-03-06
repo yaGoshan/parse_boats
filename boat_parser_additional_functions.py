@@ -39,11 +39,3 @@ def load_image_from_url(url, model):
         handler.write(img_data)
 
 
-def load_and_save_html(link, name):
-    url = link + "?units=metric"
-    r = requests.get(url)
-
-    html = r.text
-
-    with open(os.getcwd() + '/html/' + name + ".html", "w") as output:
-        output.write(html)

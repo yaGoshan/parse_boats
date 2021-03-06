@@ -2,7 +2,7 @@ import requests
 import parse_ads_basics as pbb
 from datetime import datetime
 from bs4 import BeautifulSoup
-
+import get_n_pages as gnp
 import os
 import codecs
 import string
@@ -11,20 +11,6 @@ import re
 import time
 import csv
 
-
-
-
-
-def get_n_pages_nettivene(html='n'):
-    if html == 'n':
-        url = "https://www.nettivene.com/en/purjevene"
-        r = pbb.get_html_from_url(url)
-    else:
-        r = html
-    soup = BeautifulSoup(r, 'lxml')
-    # print(soup.get_text())
-    n_page = int(soup.find("span", class_="totPage").text)
-    return n_page
 
 
 def load_boat_by_link_nettivene(url=''):
@@ -42,7 +28,7 @@ def load_boat_by_link_nettivene(url=''):
     print(bmodel)
 
     test = False
-    if test != True:
+    if not test:
         name = bmodel + '/' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '_' + idb
         path_to_folder = pbb.get_path('boat_pages') + name
         # os.makedirs(pbb.get_path('boat_pages')+bmodel, exist_ok=True)
@@ -69,7 +55,7 @@ def parse_links_from_nettivene():
     """ Parses links to boat pages boat names and prices. """
     url_base = "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"
     result = list()
-    for i in range(1, get_n_pages_nettivene() + 1):
+    for i in range(1, gnp.gnp_nettivene() + 1):
     # for i in range(1, 3):
         url = url_base.format(str(i))
         print(url)

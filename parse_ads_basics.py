@@ -20,7 +20,7 @@ def get_html_from_url(url):
     
     browser = webdriver.Firefox(executable_path='./drivers/geckodriver', firefox_profile=profile)
     browser.get(url)
-    time.sleep(10)
+    time.sleep(20)
     r = browser.page_source
     
     # print(r)
@@ -109,7 +109,7 @@ def diff_parse_links(site, mode='', offset=0):
     still_boats = [x for x in new_s if x in old_s]
 
     print("Boats used to be:" + str(len(old_s)),
-          "Boats now:" + str(len(new_s)),
+          "Uniq! boats now:" + str(len(new_s)),
           "New boats: " + str(len(new_boats)),
           "Boats sold: " + str(len(sold_boats)),
           "Boats still: " + str(len(still_boats)), sep='\n', end='\n\n')
@@ -140,11 +140,12 @@ def diff_parse_links(site, mode='', offset=0):
     if mode == 'l':
         return new_s
 
-def save_html_file(url):
-    r = requests.get(url).text
-    with open(pbb.get_path() + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
+
+def save_html_file(url, name):
+    html = requests.get(url).text
+    with open(get_path() + 'html/' + name + '_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
               'w') as output:
-        output.write(r)
+        output.write(html)
 
 
 def load_html_file(name):
