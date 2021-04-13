@@ -58,7 +58,7 @@ def parse_links_blocket():
     result = list()
     try:
         for i in range(1, gnp.gnp_blocket() + 1):
-        # for i in range(8, 9):
+        # for i in range(9, 10):
             url = url_base.format(str(i))
             print(url)
             r = pab.get_html_from_url(url)
@@ -123,7 +123,7 @@ def load_all_new_boats_blocket():
 
 
 if __name__ == "__main__":
-    parse_links_from_blocket()
+    parse_links_blocket()
     pab.diff_parse_links(site='blocket', mode='d', offset=0)
     # load_boat_by_link_blocker()
     # load_all_new_boats_blocket()

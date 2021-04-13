@@ -136,13 +136,13 @@ def diff_parse_links(site, mode='', offset=0):
     if mode == 'a':
         print('Mode not working.')
     if mode == 'd':
-        return new_boats
+        return sold_boats, new_boats
     if mode == 'l':
-        return new_s
+        return new_s, old_s
 
 
 def save_html_file(url, name):
-    html = requests.get(url).text
+    html = get_html_from_url(url)
     with open(get_path() + 'html/' + name + '_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
               'w') as output:
         output.write(html)

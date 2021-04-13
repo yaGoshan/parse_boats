@@ -1,5 +1,5 @@
 import requests
-import parse_ads_basics as pbb
+import parse_ads_basics as pab
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -14,7 +14,7 @@ import csv
 
 def get_n_pages_boats24():
     url = 'https://www.boats24.com/sailboat/#zustand=gebraucht&auswahl=7'
-    r = pbb.get_html_from_url(url)
+    r = pab.get_html_from_url(url)
     soup = BeautifulSoup(r, 'lxml')
     text = soup.find_all(True, {'class': ['sr-us']})
     n_boats = int(text[0].get_text().split()[0])
@@ -32,7 +32,7 @@ def parse_links_from_boats24():
         # for i in range(1, 4):
             url = url_base.format(str(i))
             print(url)
-            r = pbb.get_html_from_url(url)
+            r = pab.get_html_from_url(url)
             soup = BeautifulSoup(r, 'lxml')
 
             boat = []
@@ -93,5 +93,6 @@ def parse_links_from_boats24():
 if __name__ == '__main__':
     # get_n_pages_boats24()
     parse_links_from_boats24()
+    pab.diff_parse_links('boats24', mode='d')
 
 

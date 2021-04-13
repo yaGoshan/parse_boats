@@ -61,3 +61,17 @@ def gnp_finn_no(html='n'):
     n_page = int(n_boat) // 50 + 1
     print('Finn.no boats total:', n_boat)
     return n_page, n_boat
+
+
+def gnp_sailboat_data():
+    url = "https://sailboatdata.com/sailboat"
+    r = pab.get_html_from_url(url)
+    boat_number = -1
+    soup = BeautifulSoup(r, 'lxml')
+    texts = soup.find_all('li')
+    for text in texts:
+        res = text.text.find('sailboats')
+        if res != -1:
+            boat_number = int(text.text[0:res])
+            print("Sailboat_data boats total: ", boat_number)
+    return boat_number

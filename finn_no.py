@@ -1,6 +1,5 @@
 import requests
 import parse_ads_basics as pab
-import boat_parser_additional_functions as bp_af
 from datetime import datetime
 from bs4 import BeautifulSoup
 import get_n_pages as gnp
@@ -67,7 +66,7 @@ def parse_links_finn_no():
 
 
 if __name__ == "__main__":
-    # parse_links_finn_no()
+    parse_links_finn_no()
     pab.diff_parse_links('finn_no', 'd')
 
     # print(html)
