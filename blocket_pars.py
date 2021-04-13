@@ -54,10 +54,11 @@ def load_boat_by_link_blocket(url=''):
 
 def parse_links_blocket():
     """ Parses links to boat pages, boat names and prices. """
+    site = 'blocket'
     url_base = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page={}&q=segelb%C3%A5t"
     result = list()
     try:
-        for i in range(1, gnp.gnp_blocket() + 1):
+        for i in range(1, gnp.get_p_and_b(site)[0] + 1):
         # for i in range(9, 10):
             url = url_base.format(str(i))
             print(url)

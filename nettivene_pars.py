@@ -73,9 +73,10 @@ def extract_ads_nettivene(html):
 
 def parse_links_from_nettivene():
     """ Parses links to boat pages boat names and prices. """
+    site = 'nettivene'
     url_base = "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"
     result = list()
-    for i in range(1, gnp.gnp_nettivene() + 1):
+    for i in range(1, gnp.get_p_and_b(site)[0] + 1):
     # for i in range(1, 3):
         url = url_base.format(str(i))
         print(url)

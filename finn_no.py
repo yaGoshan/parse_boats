@@ -43,10 +43,11 @@ def extract_ads_finn_no(html):
 
 def parse_links_finn_no():
     """ Parses links to boat names, boat pages, prices(Norway krone) and year. """
+    site = 'finn'
     url_base = "https://www.finn.no/boat/forsale/search.html?class=2188&page={}&sort=PUBLISHED_DESC"
     result = list()
     try:
-        for i in range(1, gnp.gnp_finn_no()[0] + 1):
+        for i in range(1, gnp.get_p_and_b(site)[0] + 1):
         # for i in range(1, 2):
             url = url_base.format(str(i))
             print(url)

@@ -11,7 +11,7 @@ import csv
 from selenium import webdriver
 
 
-def get_html_from_url(url):
+def get_html_from_url(url, time_to_wait=20):
     profile = webdriver.FirefoxProfile()
     # 1 - Allow all images
     # 2 - Block all images
@@ -20,7 +20,7 @@ def get_html_from_url(url):
     
     browser = webdriver.Firefox(executable_path='./drivers/geckodriver', firefox_profile=profile)
     browser.get(url)
-    time.sleep(20)
+    time.sleep(time_to_wait)
     r = browser.page_source
     
     # print(r)
@@ -143,14 +143,15 @@ def diff_parse_links(site, mode='', offset=0):
 
 def save_html_file(url, name):
     html = get_html_from_url(url)
+    time.sleep(20)
     with open(get_path() + 'html/' + name + '_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
               'w') as output:
         output.write(html)
 
 
-def load_html_file(name):
+def load_html_file(name, subfolder):
     text = ''
-    with open(get_path() + name,
+    with open(get_path(subfolder) + name,
               'r') as output:
         text = output.read()
     return text
