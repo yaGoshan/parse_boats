@@ -12,9 +12,9 @@ import json
 import math
 import csv
 
-site_links = {'nettivene': 'https://www.nettivene.com/en/purjevene', 
+links_n_page = {'nettivene': 'https://www.nettivene.com/en/purjevene', 
               'blocket': "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&q=segelb%C3%A5t",
-              'finn': "https://www.finn.no/boat/forsale/search.html?class=2188&sort=PUBLISHED_DESC"}
+              'finn_no': "https://www.finn.no/boat/forsale/search.html?class=2188&sort=PUBLISHED_DESC"}
 
 
 def nettivene_pab(html):
@@ -38,7 +38,7 @@ def blocket_pab(html):
     return n_page, n_boat
 
 
-def finn_pab(html):
+def finn_no_pab(html):
     soup = BeautifulSoup(html, 'lxml')
     script = soup.find_all(True, {'class': ['u-strong']})
     n_boat = script[0].text
@@ -48,7 +48,7 @@ def finn_pab(html):
     
 def get_p_and_b(site, html='n'):
     if html == 'n':
-        url = site_links[site]
+        url = links_n_page[site]
         r = pbb.get_html_from_url(url)
     else:
         r = html
@@ -116,6 +116,7 @@ def get_p_and_b(site, html='n'):
 
 
 def gnp_sailboat_data():
+    """ Old function for parsing from sailboatdata.com """
     url = "https://sailboatdata.com/sailboat"
     r = pab.get_html_from_url(url)
     boat_number = -1

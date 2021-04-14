@@ -12,6 +12,7 @@ import time
 import json
 import math
 import csv
+import extract_parse_save as eps
 
 
 def load_boat_by_link_blocket(url=''):
@@ -65,11 +66,8 @@ def parse_links_blocket():
             r = pab.get_html_from_url(url)
             soup = BeautifulSoup(r, 'lxml')
 
-            # print(r)
-
             """ R1 - boat names. R2 - boat price  R3 - boat links"""
             boats = []
-            # print(r)
 
             for EachPart in soup.select('a[class*="Link-sc-6wulv7-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj"]'):
                 # print(EachPart.get_text(), EachPart['href'], type(EachPart))
@@ -124,7 +122,7 @@ def load_all_new_boats_blocket():
 
 
 if __name__ == "__main__":
-    parse_links_blocket()
+    eps.load_and_save('blocket')
     pab.diff_parse_links(site='blocket', mode='d', offset=0)
     # load_boat_by_link_blocker()
     # load_all_new_boats_blocket()
