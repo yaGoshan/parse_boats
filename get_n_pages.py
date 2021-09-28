@@ -27,7 +27,12 @@ def nettivene_pab(html):
 def blocket_pab(html):
     soup = BeautifulSoup(html, 'lxml')
     script = soup.find_all('a', href=True)
-    n_boat = soup.find('div', {'data-cy': 'search-result-count'}).text.split(' ')[0]
+    n_boat = soup.find('div', {'data-cy': 'search-result-count'}).text.split(' ')[:-1]
+    temp_var = ''
+    for i in n_boat:
+        temp_var += i
+    n_boat = int(temp_var)
+
     n_page = 0
     for link in script:
         useful_link = link['href'].find('page=')
@@ -35,6 +40,7 @@ def blocket_pab(html):
             text = link['href'][useful_link+5:useful_link+10].split('&')[0]
             if int(text) > n_page:
                 n_page = int(text)
+
     return n_page, n_boat
 
 

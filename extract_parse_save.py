@@ -21,15 +21,15 @@ ads_page_links = {'finn_no': 'https://www.finn.no/boat/forsale/search.html?class
                   'nettivene': "https://www.nettivene.com/en/purjevene?sortCol=enrolldate&ord=DESC&page={}"}
 
 
-def load_and_save(site, print_=False):
+def load_and_save(site, print_=True):
     """ Parses links to boat names, boat pages, prices(Norway krone) and year. """
-    url_base = ads_page_links['site']
+    url_base = ads_page_links[site]
     result = list()
 
     try:
         n_page = gnp.get_p_and_b(site)[0]
         for i in range(1, n_page + 1):
-            # for i in range(1, 2):
+        # for i in range(1, 3):
             url = url_base.format(str(i))
             print('Current page: ', i, 'out of:', n_page)
             r = pab.get_html_from_url(url)
@@ -43,7 +43,7 @@ def load_and_save(site, print_=False):
             result += boats
     finally:
         name = site + '_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
-        with open(os.getcwd() + '/' + '_boat_links/' + name + '.csv', 'w') as csv_file:
+        with open(os.getcwd() + '/' + site + '_boat_links/' + name + '.csv', 'w') as csv_file:
             writer = csv.writer(csv_file, delimiter=';')
             for boat in result:
                 writer.writerow(boat)
@@ -100,18 +100,19 @@ def extract_ads_blocket(html):
     soup = BeautifulSoup(html, 'lxml')
     """ R1 - boat names. R2 - boat price  R3 - boat links"""
     boats = []
-
-    for EachPart in soup.select('a[class*="Link-sc-6wulv7-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj"]'):
+    print(soup.text)
+    for EachPart in soup.select('a[class*="Link-sc-6wulv7-0 styled__StyledTitleLink-sc-1kpvi4z-10 kWpDHB ilOvgj"]'):
         # print(EachPart.get_text(), EachPart['href'], type(EachPart))
         boats.append([EachPart.get_text(), 'https://www.blocket.se' + EachPart['href']])
+        # print(EachPart)
 
-    for idx, EachPart in enumerate(soup.select('div[class*="Price__StyledPrice-sc-1v2maoc-1 jkvRCw"]')):
+    for idx, EachPart in enumerate(soup.select('div[class*="Price__StyledPrice-sc-1v2maoc-1 dmOeSM"]')):
         # print(EachPart.get_text())
         price = EachPart.get_text().replace(' ', '').replace('kr', '')
         if len(price) == 0:
             price = -1
         if idx < len(boats):
             boats[idx].append(price)
-        else:
-            print(price)
+        # else:
+            # print(price)
     return boats

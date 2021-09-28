@@ -53,63 +53,6 @@ def load_boat_by_link_blocket(url=''):
         print("There " + str(n_pics) + ' pics.')
 
 
-def parse_links_blocket():
-    """ Parses links to boat pages, boat names and prices. """
-    site = 'blocket'
-    url_base = "https://www.blocket.se/annonser/hela_sverige/fordon/batar/segelbat?cg=1062&page={}&q=segelb%C3%A5t"
-    result = list()
-    try:
-        for i in range(1, gnp.get_p_and_b(site)[0] + 1):
-        # for i in range(9, 10):
-            url = url_base.format(str(i))
-            print(url)
-            r = pab.get_html_from_url(url)
-            soup = BeautifulSoup(r, 'lxml')
-
-            """ R1 - boat names. R2 - boat price  R3 - boat links"""
-            boats = []
-
-            for EachPart in soup.select('a[class*="Link-sc-6wulv7-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj"]'):
-                # print(EachPart.get_text(), EachPart['href'], type(EachPart))
-                boats.append([EachPart.get_text(), 'https://www.blocket.se' + EachPart['href']])
-
-            for idx, EachPart in enumerate(soup.select('div[class*="Price__StyledPrice-sc-1v2maoc-1 jkvRCw"]')):
-                # print(EachPart.get_text())
-                price = EachPart.get_text().replace(' ', '').replace('kr', '')
-                if len(price) == 0:
-                    price = -1
-                if idx < len(boats):
-                    boats[idx].append(price)
-                else:
-                    print(price)
-
-            for boat in boats:
-                print(boat)
-            result += boats
-            # input()
-            # r1 = soup.find_all('span', class_='styled__SubjectContainer-sc-1kpvi4z-11 jzzuDW')
-            # r2 = soup.find_all('div', class_='Price__StyledPrice-sc-1v2maoc-1 jkvRCw')
-            # r3 = soup.find_all('a', class_='Link-sc-139ww1j-0 styled__StyledTitleLink-sc-1kpvi4z-10 enigRj')
-            # print(r1, r2, r3, sep='\n')
-            # for i in range(len(r1)):
-            #     # print([r1[i].get_text(),r3[i]['href'],r2[i].get_text()])
-            #     bname = r1[i].get_text().replace('|', '').replace('\\', '').replace('/', '').replace(';', '')
-            #     if r2[i].get_text().replace(' ', '') == '':
-            #         price = '-1'
-            #     else:
-            #         price = r2[i].get_text().replace(' ', '').replace('kr', '')
-            #     result.append([bname, 'https://www.blocket.se' + r3[i]['href'], price])
-
-        # print(result)
-    finally:
-        name = 'blocket_boat_links_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S"))
-        with open(os.getcwd() + '/blocket_boat_links/' + name + '.csv', 'w') as csv_file:
-            writer = csv.writer(csv_file, delimiter=';')
-            for boat in result:
-                writer.writerow(boat)
-        print("Boats total: " + str(len(result)))
-
-
 def load_all_new_boats_blocket():
     i = 0
     links = diff_parse_links(mode='d')
@@ -122,7 +65,7 @@ def load_all_new_boats_blocket():
 
 
 if __name__ == "__main__":
-    eps.load_and_save('blocket')
+    # eps.load_and_save('blocket', print_=False)
     pab.diff_parse_links(site='blocket', mode='d', offset=0)
     # load_boat_by_link_blocker()
     # load_all_new_boats_blocket()

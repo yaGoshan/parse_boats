@@ -144,10 +144,11 @@ def diff_parse_links(site, mode='', offset=0):
 def save_html_file(url, name):
     html = get_html_from_url(url)
     time.sleep(20)
-    with open(get_path() + 'html/' + name + '_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html',
+    path = get_path() + 'html/' + name + '_' + str(datetime.now().strftime("%Y.%m.%d_%H.%M.%S")) + '.html'
+    with open(path,
               'w') as output:
         output.write(html)
-
+    print(path)
 
 def load_html_file(name, subfolder):
     text = ''
