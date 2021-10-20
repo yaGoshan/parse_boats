@@ -100,7 +100,7 @@ def extract_ads_blocket(html):
     soup = BeautifulSoup(html, 'lxml')
     """ R1 - boat names. R2 - boat price  R3 - boat links"""
     boats = []
-    print(soup.text)
+    # print(soup.text)
     for EachPart in soup.select('a[class*="Link-sc-6wulv7-0 styled__StyledTitleLink-sc-1kpvi4z-10 kWpDHB ilOvgj"]'):
         # print(EachPart.get_text(), EachPart['href'], type(EachPart))
         boats.append([EachPart.get_text(), 'https://www.blocket.se' + EachPart['href']])

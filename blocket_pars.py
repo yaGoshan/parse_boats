@@ -65,7 +65,7 @@ def load_all_new_boats_blocket():
 
 
 if __name__ == "__main__":
-    # eps.load_and_save('blocket', print_=False)
+    eps.load_and_save('blocket', print_=False)
     pab.diff_parse_links(site='blocket', mode='d', offset=0)
     # load_boat_by_link_blocker()
     # load_all_new_boats_blocket()
