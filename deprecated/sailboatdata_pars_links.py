@@ -11,7 +11,8 @@ import parse_ads_basics as pab
 
 
 def db_add_boat_link(link_info):
-    conn = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='localhost')
+    conn = psycopg2.connect(dbname=secret.db_name, user=secret.db_user, password=secret.db_password,
+                            host=secret.db_host)
     cursor = conn.cursor()
 
     cursor.execute('INSERT INTO boat_list.list_of_links (link,model) VALUES (%s,%s);',

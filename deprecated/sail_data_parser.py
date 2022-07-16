@@ -7,6 +7,7 @@ import os
 import codecs
 import boat_parser_additional_functions as bp_add
 import sailboatdata_pars_links as bl
+import secret
 
 """
     Data to extract:
@@ -53,7 +54,7 @@ Tanks (Fuel and Water)
 """
 
 """
-manufacturer, model, length, LWL, description, width, id, Draft(max), Draft(min),
+model, length, LWL, description, width, id, Draft(max), Draft(min),
 weight, keel_type, ballast_weight, steering_system, hull_type, first_built,
 last_built, builder, designer, linksailboatdata, rigging_type, sail_area, ballast_type,
 n_built,mast_height,hull_material
@@ -69,9 +70,13 @@ n_built,mast_height,hull_material
 
 
 def db_add_boat_model(boat_info, id):
-    conn = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='localhost')
+    conn = psycopg2.connect(dbname=secret.db_name, user=secret.db_user, password=secret.db_password,
+                            host=secret.db_host)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO boat_list.sailboat_models (model,length, hull_material, lwl, width, draft_max,'
+    # print(boat_info.get('model'), id)
+
+    cursor.execute('INSERT INTO ' + secret.db_schema + '.sailboat_models (model,length, hull_material, lwl, width, '
+                                                       'draft_max, '
                    'draft_min, weight, ballast_weight, keel_type,first_built, last_built, n_built,'
                    ' rigging_type, ballast_type, linksailboatdata, id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'
                    '%s,%s,%s,%s,%s,%s,%s,%s,%s);',
@@ -87,7 +92,7 @@ def db_add_boat_model(boat_info, id):
 
 
 def db_connect():
-    conn = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='localhost')
+    conn = psycopg2.connect(dbname=secret.db_name, user=secret.db_user, password=secret.db_password, host=secret.db_host)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM boat_list.sailboat_models')
     # cursor.execute("SELECT column_name FROM information_schema.columns where table_name='sailboat_models'")
@@ -102,43 +107,50 @@ def db_connect():
 
 def get_sail_data_from_html(html):
     soup = BeautifulSoup(html, 'lxml')
+    try:
+        boat_model = soup.find_all("h1")[1].text.replace(' ', '_')
+        """ Load photos """
+        pics = soup.find_all("img", {"class": "img-responsive center-block"})
+        # for pic in pics:
+        #     # print(pic['src'])
+        #     bp_add.load_image_from_url(pic['src'], boat_model)
 
-    boat_model = soup.find_all("h1")[1].text.replace(' ', '_')
-    """ Load photos """
-    pics = soup.find_all("img", {"class": "img-responsive center-block"})
-    # for pic in pics:
-    #     # print(pic['src'])
-    #     bp_add.load_image_from_url(pic['src'], boat_model)
+        """ Get data """
+        desc = soup.find_all("div", class_="col-sm-3")
+        desc = desc + soup.find_all("div", class_="col-sm-2")
+        # print(desc)
+        a = []
+        for item in desc:
+            obj = item.text.strip()
+            if obj[-1:] == ':': obj = obj[:-1]
+            if obj[-2:] == ' m': obj = obj[:-2]
+            if obj[-2:] == 'kg': obj = obj[:-3]
+            if obj[-2:] == 'm2': obj = obj[:-3]
+            if obj[-4:-3] == ',': obj = obj.replace(',', '')
+            if obj.find(',') == True: obj = obj.replace(',', '')
 
-    """ Get data """
-    desc = soup.find_all("div", class_="col-sm-3")
-    desc = desc + soup.find_all("div", class_="col-sm-2")
-    # print(desc)
-    a = []
-    for item in desc:
-        obj = item.text.strip()
-        if obj[-1:] == ':': obj = obj[:-1]
-        if obj[-2:] == ' m': obj = obj[:-2]
-        if obj[-2:] == 'kg': obj = obj[:-3]
-        if obj[-2:] == 'm2': obj = obj[:-3]
-        if obj[-4:-3] == ',': obj = obj.replace(',', '')
-        if obj.find(',') == True: obj = obj.replace(',', '')
+            a.append(obj)
+        b = dict(zip(a[::2], a[1::2]))
+        b.update({"model": boat_model.replace('_', ' ')})
+        link = soup.find('a', class_='btn-default').get('href')
+        b.update({'link': link})
 
-        a.append(obj)
-    b = dict(zip(a[::2], a[1::2]))
-    b.update({"model": boat_model.replace('_', ' ')})
-    link = soup.find('a', class_='btn-default').get('href')
-    b.update({'link': link})
+        for key in b.keys():
+            if b.get(key) == '':
+                b.update({key: '-1'})
 
-    for key in b.keys():
-        if b.get(key) == '':
-            b.update({key: '-1'})
+        return b
 
-    return b
+    except:
+        print("Поиск тегов не нашёл нужного. Проверь html файл.")
+        print(soup.find_all("h1"), soup.text, html.name)
+        return dict()
+
 
 
 def proceed_loaded_htmls():
     list_of_boat_files = os.listdir(os.getcwd() + '/html')
+    list_of_boat_files.sort()
     # i = 4079
     for i in range(0, len(list_of_boat_files)):
 
@@ -148,19 +160,20 @@ def proceed_loaded_htmls():
 
         html = codecs.open(os.getcwd() + '/html/' + list_of_boat_files[i], "r")
         boat_info = get_sail_data_from_html(html)
-        db_add_boat_model(boat_info, i)
-        i = i + 1
+        if len(boat_info) != 0:
+            db_add_boat_model(boat_info, i)
+        # i = i + 1
 
 
 def main():
     """ Parse links to boat pages, to list_of_links BD """
-    bl.get_boat_pages_from_search(
-        file_name='info_' + str(datetime.now().strftime("%Y.%m.%d_%H:%M:%S")), all_pages=True)
+    # bl.get_boat_pages_from_search(
+    #     file_name='info_' + str(datetime.now().strftime("%Y.%m.%d_%H:%M:%S")), all_pages=True)
     """ Get links from DB table 'list_of_links', and load and save html files """
     # procced_list_of_links()
 
     """ Proceed data from html files. Contains get_sail_data_from_html, save_pics and add info to DB """
-    # proceed_loaded_htmls()
+    proceed_loaded_htmls()
 
 
 # 
