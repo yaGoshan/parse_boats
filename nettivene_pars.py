@@ -12,6 +12,7 @@ import re
 import time
 import csv
 import extract_parse_save as eps
+import parse_ads_basics as pab
 
 
 def load_boat_by_link_nettivene(url=''):
@@ -78,17 +79,18 @@ def load_boat_by_link_nettivene(url=''):
 
 def load_all_new_boats_nettivene():
     i = 0
-    links = diff_parse_links(mode='d')
+    links = pab.diff_parse_links('nettivene', mode='d')[1]
     for link in links:
         i = i + 1
         load_boat_by_link_nettivene(link)
         print("Made: " + str(i) + ' Out of: ' + str(len(links)))
         print('')
-        time.sleep(3)
+        time.sleep(30)
 
 
 if __name__ == "__main__":
-    eps.load_and_save('nettivene')
-    print(pab.diff_parse_links(site='nettivene', mode='d'))
-
-    # load_all_new_boats_nettivene()
+    """ Загружает список лодок без их индивидуального обхода."""
+    # eps.load_and_save('nettivene')
+    # print(pab.diff_parse_links(site='nettivene', mode='d'))
+    """ Загружает полную страницу лодки с картинками и сохраняет их в файл. """
+    load_all_new_boats_nettivene()
