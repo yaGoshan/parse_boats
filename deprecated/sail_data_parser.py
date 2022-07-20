@@ -149,7 +149,9 @@ def get_sail_data_from_html(html):
 
 
 def proceed_loaded_htmls():
-    list_of_boat_files = os.listdir(os.getcwd() + '/html')
+    """ Функция считает, что файл находится в папке depracated поэтому берёт -11 """
+    path = os.getcwd()[:-11]
+    list_of_boat_files = os.listdir(path + '/html')
     list_of_boat_files.sort()
     # i = 4079
     for i in range(0, len(list_of_boat_files)):
@@ -158,11 +160,10 @@ def proceed_loaded_htmls():
             print('Proceeded ' + str(i))
         # time.sleep(0.1)
 
-        html = codecs.open(os.getcwd() + '/html/' + list_of_boat_files[i], "r")
+        html = codecs.open(path + '/html/' + list_of_boat_files[i], "r")
         boat_info = get_sail_data_from_html(html)
         if len(boat_info) != 0:
             db_add_boat_model(boat_info, i)
-        # i = i + 1
 
 
 def main():

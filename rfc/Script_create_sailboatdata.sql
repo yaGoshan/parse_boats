@@ -1,0 +1,26 @@
+create table boat_site_test01.sailboat_models ();
+
+ALTER TABLE boat_site_test01.sailboat_models ADD model varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD length varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD lwl varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD description varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD width varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD draft_max varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD draft_min varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD weight varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD keel_type varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD ballast_weight varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD steering_system varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD hull_type varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD first_built varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD last_built varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD builder varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD designer varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD linksailboatdata varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD rigging_type varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD sail_area varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD ballast_type varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD n_built varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD mast_height varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD id varchar NULL;
+ALTER TABLE boat_site_test01.sailboat_models ADD hull_material varchar NULL;
