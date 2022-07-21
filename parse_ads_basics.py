@@ -65,13 +65,20 @@ def read_links_from_file(file_name, site):
     return res
 
 
-def get_files_list(path_to, file_extension='csv'):
+def get_files_list(path_to, file_extension='csv', subfolders=False):
     files_list = []
-    for file in os.listdir(path_to):
-        if file.endswith("." + file_extension):
-            # print(os.path.join(os.getcwd(), file))
-            # print(file)
-            files_list.append([file, os.path.getctime(path_to + file)])
+    if subfolders == False:
+        for file in os.listdir(path_to):
+            if file.endswith("." + file_extension):
+                # print(os.path.join(os.getcwd(), file))
+                # print(file)
+                files_list.append([file, os.path.getctime(path_to + file)])
+    else:
+        for path, subdirs, files in os.walk(path_to):
+            for name in files:
+                if name.endswith("." + file_extension):
+                    # print(os.path.join(path, name))
+                    files_list.append(os.path.join(path, name))
     return files_list
 
 
@@ -153,6 +160,14 @@ def save_html_file(url, name):
 def load_html_file(name, subfolder):
     text = ''
     with open(get_path(subfolder) + name,
+              'r') as output:
+        text = output.read()
+    return text
+
+
+def load_text_file(path):
+    text = ''
+    with open(path,
               'r') as output:
         text = output.read()
     return text

@@ -76,24 +76,6 @@ def extract_ads_finn_no(html):
     return boats
 
 
-def extract_ads_nettivene(html):
-    soup = BeautifulSoup(html, 'lxml')
-    boats = []
-    r1 = soup.find_all('a', class_='childVifUrl tricky_link')
-    r2 = soup.find_all('div', class_='main_price')
-
-    for b in r1:
-        boats.append([b.get_text().strip(), b['href']])
-        # print(b.get_text())
-        # print(b['href'])
-
-    for idx, b in enumerate(r2):
-        # print(b.get_text())
-        if b.get_text().replace(' ', '') == 'Notpriced':
-            boats[idx].append('-1')
-        else:
-            boats[idx].append(b.get_text().replace(' ', '').replace('€', ''))
-    return boats
 
 
 def extract_ads_blocket(html):

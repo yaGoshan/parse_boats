@@ -1,10 +1,14 @@
 
 def create_db():
-    info = "1 model 2 length 3 lwl 4 description 5 width 6 draft_max 7 draft_min 8 weight 9 keel_type 10 ballast_weight 11 steering_system 12 hull_type 13 first_built 14 last_built 15 builder 16 designer 17 linksailboatdata 18 rigging_type 19 sail_area 20 ballast_type 21 n_built 22 mast_height 23 id 24 hull_material"
-    basic_str = "ALTER TABLE boat_site_test01.sailboat_models ADD xxx varchar NULL;"
-    # basic_str = "xxx = db.Column(db.String())"
+    info_sailboatdata = "model length lwl description width draft_max draft_min weight keel_type ballast_weight steering_system hull_type first_built last_built builder designer linksailboatdata rigging_type sail_area ballast_type n_built mast_height id hull_material"
+    info_nettivene = "header id_nettivene vehicle_brand vehicle_model price year_prod hull_material length width draft weight steering_system mast_height accessories note engine_information heating_information sail_information location coordinates link model_suggested model_id_suggested date_added date_deleted date_checked"
+    basic_str = "ALTER TABLE boat_site_test01.nettivene ADD xxx varchar NULL;"
 
-    for item in info.split(" "):
+
+
+# basic_str = "xxx = db.Column(db.String())"
+
+    for item in info_nettivene.split(" "):
         try:
             int(item)
         except Exception:
@@ -13,3 +17,6 @@ def create_db():
 
 if __name__ == "__main__":
     create_db()
+
+
+
