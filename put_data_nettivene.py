@@ -138,6 +138,9 @@ def extract_ad_nettivene(html):
     # ad.sail_information = sail_information
     # print(sail_information)
 
+    # link =
+    ad.link = soup.find("link", {'hreflang': 'en'}).get("href")
+
     note = str()
     for item in soup.find_all('p', class_="ma0"):
         note += item.text

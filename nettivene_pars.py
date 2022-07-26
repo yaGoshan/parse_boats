@@ -90,7 +90,7 @@ def load_all_new_boats_nettivene():
 
 if __name__ == "__main__":
     """ Загружает список лодок без их индивидуального обхода."""
-    # eps.load_and_save('nettivene')
-    # print(pab.diff_parse_links(site='nettivene', mode='d'))
+    eps.load_and_save('nettivene')
+    print(pab.diff_parse_links(site='nettivene', mode='d'))
     """ Загружает полную страницу лодки с картинками и сохраняет их в файл. """
-    load_all_new_boats_nettivene()
+    # load_all_new_boats_nettivene()
